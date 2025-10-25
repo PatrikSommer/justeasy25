@@ -1,0 +1,24 @@
+# Cesta: docker-compose.yaml
+
+services:
+    db:
+        container_name: postgres-db
+        image: postgres:16 # 👈 Novější verze (stabilní)
+        restart: unless-stopped # 👈 Automatický restart při pádu
+        ports:
+            - '5432:5432'
+        volumes:
+            - postgres_data:/var/lib/postgresql/data # 👈 Named volume (lepší)
+        environment:
+            POSTGRES_USER: justeasy
+            POSTGRES_PASSWORD: justeasy
+            POSTGRES_DB: justeasy
+            POSTGRES_HOST_AUTH_METHOD: trust # 👈 Pro development (bez hesla lokálně)
+        healthcheck: # 👈 Kontrola, že DB běží
+            test: ['CMD-SHELL', 'pg_isready -U justeasy']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    postgres_data: # 👈 Definice named volume

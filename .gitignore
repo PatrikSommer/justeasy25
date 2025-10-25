@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+build/
+dist/
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.cursor/
+.idea/
+*.swp
+*.swo
+*~
+.cursorrules
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 🔽 TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Docker
+docker-compose.override.yml
+
+
+# 🔽 Backend build
+backend/build/
+backend/dist/
+
+# Uploads (pokud později přidáš upload souborů)
+uploads/
+
+
+# Database
+db/*
+!db/.gitkeep
+
+# Prisma (ponecháváme schema + migrace, ignorujeme cache a klienta)
+backend/prisma/.env
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+backend/prisma/*.sqlite
+backend/prisma/*.sqlite-journal
+backend/prisma/.prisma/
