@@ -5,6 +5,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
+import authRouter from './routes/auth.routes.js';
+
 import healthRouter from './routes/health.routes.js';
 import dbTestRouter from './routes/db-test.routes.js';
 import usersRouter from './routes/users.routes.js';
@@ -25,6 +27,7 @@ app.use(
 ); // povolení komunikace s FE
 
 // routy
+app.use('/auth', authRouter);
 app.use('/health', healthRouter);
 app.use('/db-test', dbTestRouter);
 app.use('/users', usersRouter);
