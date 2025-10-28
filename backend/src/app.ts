@@ -27,10 +27,11 @@ app.use(
 ); // povolení komunikace s FE
 
 // routy
-app.use('/auth', authRouter);
+const prefixApi = '/api/v1';
 app.use('/health', healthRouter);
-app.use('/db-test', dbTestRouter);
-app.use('/users', usersRouter);
+app.use(`${prefixApi}/auth`, authRouter);
+app.use(`${prefixApi}/db-test`, dbTestRouter);
+app.use(`${prefixApi}/users`, usersRouter);
 
 // fallback root route
 app.get('/', (_req, res) => {

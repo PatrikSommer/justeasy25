@@ -10,10 +10,12 @@ import {
 	REFRESH_TOKEN_EXPIRES_MS,
 } from '../config/constants.js';
 import { env } from '../config/env.js';
+import { LoginInput } from '../schemas/auth.schema.js';
 
 export const login = async (req: Request, res: Response) => {
 	try {
-		const { email, password } = req.body;
+		// Data jsou už validovaná pomocí validate middleware
+		const { email, password } = req.body as LoginInput;
 
 		if (!email || !password) {
 			return res.status(400).json({

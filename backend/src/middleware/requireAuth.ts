@@ -1,7 +1,7 @@
 // Cesta: backend/src/middleware/requireAuth.ts
 
 import { Request, Response, NextFunction } from 'express';
-import jwt, { TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { prisma } from '../libs/prisma.js';
 
@@ -35,7 +35,7 @@ export const requireAuth = async (
 			decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
 		} catch (error) {
 			// Rozlišíme mezi expired tokenem a invalid tokenem
-			if (error instanceof TokenExpiredError) {
+			if (error instanceof Error && error.name === 'TokenExpiredError') {
 				return res.status(401).json({
 					success: false,
 					error: {
@@ -44,7 +44,7 @@ export const requireAuth = async (
 					},
 				});
 			}
-			if (error instanceof JsonWebTokenError) {
+			if (error instanceof Error && error.name === 'JsonWebTokenError') {
 				return res.status(401).json({
 					success: false,
 					error: {
