@@ -1,27 +1,20 @@
 // Cesta: backend/src/utils/jwt.ts
 
-import jwt, { SignOptions } from 'jsonwebtoken';
-import dotenv from 'dotenv';
-dotenv.config();
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import { env } from '../config/env.js';
 
-const accessSecret = process.env.JWT_SECRET!;
-const refreshSecret = process.env.JWT_REFRESH_SECRET!;
-
-export const createAccessToken = (userId: number) => {
-	const options: SignOptions = {
-		expiresIn:
-			(process.env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn']) ||
-			'15m',
-	};
-	return jwt.sign({ userId }, accessSecret, options);
+export const createAccessToken = (userId: number): string => {
+	return jwt.sign(
+		{ userId },
+		env.JWT_SECRET as Secret,
+		{ expiresIn: env.JWT_EXPIRES_IN } as SignOptions
+	);
 };
 
-export const createRefreshToken = (userId: number) => {
-	const options: SignOptions = {
-		expiresIn:
-			(process.env
-				.JWT_REFRESH_EXPIRES_IN as jwt.SignOptions['expiresIn']) ||
-			'15d',
-	};
-	return jwt.sign({ userId }, refreshSecret, options);
+export const createRefreshToken = (userId: number): string => {
+	return jwt.sign(
+		{ userId },
+		env.JWT_REFRESH_SECRET as Secret,
+		{ expiresIn: env.JWT_REFRESH_EXPIRES_IN } as SignOptions
+	);
 };

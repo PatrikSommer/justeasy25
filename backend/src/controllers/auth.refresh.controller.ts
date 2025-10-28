@@ -4,10 +4,16 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../libs/prisma.js';
 import { createAccessToken, createRefreshToken } from '../utils/jwt.js';
+import {
+	REFRESH_TOKEN_COOKIE_NAME,
+	REFRESH_TOKEN_COOKIE_MAX_AGE,
+	REFRESH_TOKEN_EXPIRES_MS,
+} from '../config/constants.js';
+import { env } from '../config/env.js';
 
 export const refresh = async (req: Request, res: Response) => {
 	try {
-		const token = req.cookies.refreshToken;
+		const token = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
 
 		if (!token) {
 			return res.status(401).json({
@@ -37,7 +43,7 @@ export const refresh = async (req: Request, res: Response) => {
 
 		// Ověříme JWT
 		try {
-			jwt.verify(token, process.env.JWT_REFRESH_SECRET!);
+			jwt.verify(token, env.JWT_REFRESH_SECRET);
 		} catch {
 			await prisma.userToken.delete({ where: { token } });
 			return res.status(401).json({
@@ -60,15 +66,15 @@ export const refresh = async (req: Request, res: Response) => {
 			data: {
 				userId: storedToken.user.id,
 				token: newRefreshToken,
-				tokenExpires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 dní
+				tokenExpires: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
 			},
 		});
 
-		res.cookie('refreshToken', newRefreshToken, {
+		res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
+			secure: env.NODE_ENV === 'production',
 			sameSite: 'lax',
-			maxAge: 15 * 24 * 60 * 60 * 1000,
+			maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
 		});
 
 		return res.status(200).json({
