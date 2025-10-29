@@ -17,6 +17,8 @@ const envSchema = z.object({
 	JWT_EXPIRES_IN: z.string().default('1d'),
 	JWT_REFRESH_SECRET: z.string().min(10),
 	JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+
+	API_SECRET_KEY: z.string().min(32, 'API key musí mít alespoň 32 znaků.'),
 });
 
 // validace proměnných prostředí

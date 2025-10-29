@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
+import { verifyApiKey } from './middleware/verifyApiKey.js';
 import authRouter from './routes/auth.routes.js';
 
 import healthRouter from './routes/health.routes.js';
@@ -26,9 +27,12 @@ app.use(
 	})
 ); // povolení komunikace s FE
 
+// API Key middleware - chrání všechny routes kromě /health a /db-test
+app.use(verifyApiKey);
 // routy
 const prefixApi = '/api/v1';
-app.use('/health', healthRouter);
+
+app.use(`${prefixApi}/health`, healthRouter);
 app.use(`${prefixApi}/auth`, authRouter);
 app.use(`${prefixApi}/db-test`, dbTestRouter);
 app.use(`${prefixApi}/users`, usersRouter);
