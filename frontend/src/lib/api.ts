@@ -1,68 +1,69 @@
 // Cesta: frontend/src/lib/api.ts
+'use server';
 
-import axios from 'axios';
+/**
+ * Server-side API wrapper
+ * Všechna volání na backend procházejí přes tento wrapper
+ * API_SECRET_KEY nikdy neopustí server
+ */
 
-// Vytvoříme axios instanci s výchozím nastavením
-export const api = axios.create({
-	baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
-	headers: {
-		'Content-Type': 'application/json',
-	},
-	withCredentials: true, // Pro cookies (refresh token)
-});
+type ApiResponse<T = unknown> = {
+	success: boolean;
+	data?: T;
+	error?: {
+		code: string;
+		message: string;
+		details?: unknown;
+	};
+	message?: string;
+};
 
-// Request interceptor - přidá access token do každého requestu
-api.interceptors.request.use(
-	(config) => {
-		// Získáme token z localStorage
-		const token = localStorage.getItem('accessToken');
+/**
+ * Univerzální funkce pro volání backendu
+ */
+export async function apiFetch<T = unknown>(
+	endpoint: string,
+	options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+	const API_KEY = process.env.API_SECRET_KEY;
+	const API_URL = process.env.BACKEND_URL || 'http://localhost:4000';
 
-		if (token) {
-			config.headers.Authorization = `Bearer ${token}`;
+	if (!API_KEY) {
+		throw new Error('API_SECRET_KEY není nastavený v .env.local');
+	}
+
+	try {
+		const response = await fetch(`${API_URL}${endpoint}`, {
+			...options,
+			headers: {
+				'Content-Type': 'application/json',
+				'X-API-Key': API_KEY,
+				...options.headers,
+			},
+			credentials: 'include', // Pro cookies (refresh token)
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			return {
+				success: false,
+				error: data.error || {
+					code: 'UNKNOWN_ERROR',
+					message: 'Něco se pokazilo.',
+				},
+			};
 		}
 
-		return config;
-	},
-	(error) => {
-		return Promise.reject(error);
+		return data;
+	} catch (error) {
+		console.error('[API_FETCH_ERROR]', error);
+		return {
+			success: false,
+			error: {
+				code: 'NETWORK_ERROR',
+				message: 'Nepodařilo se připojit k serveru.',
+			},
+		};
 	}
-);
-
-// Response interceptor - automaticky obnoví token při expiraci
-api.interceptors.response.use(
-	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-
-		// Pokud token vypršel a ještě jsme nezkoušeli refresh
-		if (error.response?.status === 401 && !originalRequest._retry) {
-			originalRequest._retry = true;
-
-			try {
-				// Zkusíme obnovit token
-				const { data } = await axios.post(
-					`${
-						process.env.NEXT_PUBLIC_API_URL ||
-						'http://localhost:4000'
-					}/auth/refresh`,
-					{},
-					{ withCredentials: true }
-				);
-
-				// Uložíme nový token
-				localStorage.setItem('accessToken', data.data.accessToken);
-
-				// Zopakujeme původní request s novým tokenem
-				originalRequest.headers.Authorization = `Bearer ${data.data.accessToken}`;
-				return api(originalRequest);
-			} catch (refreshError) {
-				// Refresh selhal → odhlásíme uživatele
-				localStorage.removeItem('accessToken');
-				window.location.href = '/login';
-				return Promise.reject(refreshError);
-			}
-		}
-
-		return Promise.reject(error);
-	}
-);
+}
