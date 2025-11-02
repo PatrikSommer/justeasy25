@@ -3,6 +3,7 @@
 
 import { cookies } from 'next/headers';
 import { apiFetch } from '@/lib/api';
+import { API_VERSION } from '@/config/const';
 
 type LoginResponse = {
 	accessToken: string;
@@ -19,7 +20,7 @@ type LoginResponse = {
  * Server Action pro přihlášení
  */
 export async function loginAction(email: string, password: string) {
-	const result = await apiFetch<LoginResponse>('/auth/login', {
+	const result = await apiFetch<LoginResponse>(`${API_VERSION}/auth/login`, {
 		method: 'POST',
 		body: JSON.stringify({ email, password }),
 	});
@@ -59,8 +60,8 @@ export async function getCurrentUser() {
 			error: { code: 'NO_TOKEN', message: 'Nejste přihlášeni.' },
 		};
 	}
-
-	const result = await apiFetch('/auth/me', {
+	// 'v1';
+	const result = await apiFetch(`${API_VERSION}/auth/me`, {
 		headers: {
 			Authorization: `Bearer ${token}`,
 		},
