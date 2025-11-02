@@ -4,12 +4,8 @@ import { Request, Response } from 'express';
 import { prisma } from '../libs/prisma.js';
 import { comparePassword } from '../utils/hash.js';
 import { createAccessToken, createRefreshToken } from '../utils/jwt.js';
-import {
-	REFRESH_TOKEN_COOKIE_NAME,
-	REFRESH_TOKEN_COOKIE_MAX_AGE,
-	REFRESH_TOKEN_EXPIRES_MS,
-} from '../config/constants.js';
-import { env } from '../config/env.js';
+import { REFRESH_TOKEN_EXPIRES_MS } from '../config/constants.js';
+
 import { LoginInput } from '../schemas/auth.schema.js';
 
 export const login = async (req: Request, res: Response) => {
