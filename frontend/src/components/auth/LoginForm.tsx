@@ -17,8 +17,8 @@ import {
 
 export function LoginForm() {
 	const router = useRouter();
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
+	const [email, setEmail] = useState('patrik@sommer.media');
+	const [password, setPassword] = useState('patrik11');
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
 
