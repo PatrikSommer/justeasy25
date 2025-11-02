@@ -60,17 +60,11 @@ export const login = async (req: Request, res: Response) => {
 			},
 		});
 
-		res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
-			httpOnly: true,
-			secure: env.NODE_ENV === 'production',
-			sameSite: 'lax',
-			maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
-		});
-
 		return res.status(200).json({
 			success: true,
 			data: {
 				accessToken,
+				refreshToken,
 				user: {
 					id: user.id,
 					email: user.email,

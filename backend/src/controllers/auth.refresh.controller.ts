@@ -13,7 +13,7 @@ import { env } from '../config/env.js';
 
 export const refresh = async (req: Request, res: Response) => {
 	try {
-		const token = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
+		const { token } = req.body;
 
 		if (!token) {
 			return res.status(401).json({
@@ -70,16 +70,12 @@ export const refresh = async (req: Request, res: Response) => {
 			},
 		});
 
-		res.cookie(REFRESH_TOKEN_COOKIE_NAME, newRefreshToken, {
-			httpOnly: true,
-			secure: env.NODE_ENV === 'production',
-			sameSite: 'lax',
-			maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
-		});
-
 		return res.status(200).json({
 			success: true,
-			data: { accessToken: newAccessToken },
+			data: {
+				accessToken: newAccessToken,
+				refreshToken: newRefreshToken,
+			},
 			message: 'Token byl obnoven.',
 		});
 	} catch (error) {
