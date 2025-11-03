@@ -4,18 +4,7 @@
 import { cookies } from 'next/headers';
 import { apiFetch } from '@/lib/api';
 import { API_VERSION } from '@/config/const';
-
-type LoginResponse = {
-	accessToken: string;
-	refreshToken: string;
-	user: {
-		id: number;
-		email: string;
-		firstName: string;
-		lastName: string;
-		role: string;
-	};
-};
+import { AuthResponse, LoginResponse } from '@/types/auth';
 
 /**
  * Server Action pro přihlášení
@@ -64,7 +53,11 @@ export async function logoutAction() {
 /**
  * Server Action pro získání aktuálního uživatele
  */
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<{
+	success: boolean;
+	data?: AuthResponse;
+	error?: { code: string; message: string };
+}> {
 	const cookieStore = await cookies();
 	const token = cookieStore.get('accessToken')?.value;
 
@@ -74,8 +67,8 @@ export async function getCurrentUser() {
 			error: { code: 'NO_TOKEN', message: 'Nejste přihlášeni.' },
 		};
 	}
-	// 'v1';
-	const result = await apiFetch(`/${API_VERSION}/auth/me`, {
+
+	const result = await apiFetch<AuthResponse>(`/${API_VERSION}/auth/me`, {
 		headers: {
 			Authorization: `Bearer ${token}`,
 		},
