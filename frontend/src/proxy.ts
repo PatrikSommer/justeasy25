@@ -1,4 +1,4 @@
-// Cesta: frontend/src/middleware.ts
+// Cesta: frontend/src/proxy.ts
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
