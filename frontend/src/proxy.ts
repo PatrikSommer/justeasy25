@@ -3,7 +3,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+/**
+ * Proxy funkce pro ochranu chráněných routes
+ *
+ * V Next.js 16+ se používá 'proxy' místo 'middleware'
+ */
+
+export function proxy(request: NextRequest) {
 	const accessToken = request.cookies.get('accessToken');
 
 	if (!accessToken) {
