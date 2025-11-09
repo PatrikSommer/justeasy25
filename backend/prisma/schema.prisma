@@ -1,58 +1,96 @@
 // Cesta: backend/prisma/schema.prisma
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
-    ADMIN
-    EDITOR
-    USER
+  ADMIN
+  EDITOR
+  USER
 }
 
 model User {
-    id                   Int       @id @default(autoincrement())
-    firstName            String
-    lastName             String
-    email                String    @unique
-    password             String
-    phone                String?
-    street               String?
-    city                 String?
-    zipCode              String?
-    imageUrl             String?
-    isActive             Boolean   @default(true)
-    role                 UserRole  @default(USER)
-    createdAt            DateTime  @default(now())
-    updatedAt            DateTime  @updatedAt
-    passwordChangedAt    DateTime?
-    passwordResetToken   String?   @unique
-    passwordResetExpires DateTime?
+  id                   Int       @id @default(autoincrement())
+  firstName            String
+  lastName             String
+  email                String    @unique
+  password             String
+  phone                String?
+  street               String?
+  city                 String?
+  zipCode              String?
+  imageUrl             String?
+  isActive             Boolean   @default(true)
+  role                 UserRole  @default(USER)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  passwordChangedAt    DateTime?
+  passwordResetToken   String?   @unique
+  passwordResetExpires DateTime?
 
-    tokens UserToken[]
-    // contractToUsers  ContractToUser[]
-    // reportUsers      ReportCarDetail[]
-    // reportCarDrivers ReportCarDriver[]
-    // reportDrivers    ReportDriver[]
-    // reportWorkers    ReportWorker[]
+  tokens UserToken[]
+  // contractToUsers  ContractToUser[]
+  // reportUsers      ReportCarDetail[]
+  // reportCarDrivers ReportCarDriver[]
+  // reportDrivers    ReportDriver[]
+  // reportWorkers    ReportWorker[]
 
-    @@index([role])
+  @@index([role])
+  @@map("user")
 }
 
 model UserToken {
-    id           Int      @id @default(autoincrement())
-    token        String   @unique
-    tokenExpires DateTime
-    userId       Int
-    user         User     @relation(fields: [userId], references: [id])
+  id           Int      @id @default(autoincrement())
+  token        String   @unique
+  tokenExpires DateTime
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([userId])
-    @@index([token])
+  @@index([userId])
+  @@index([token])
+  @@map("user_token")
+}
+
+// ===================================
+// CAR CATEGORY (Kategorie aut)
+// ===================================
+model CarCategory {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relace: jedna kategorie má mnoho aut
+  cars Car[]
+
+  @@map("car_category")
+}
+
+// ===================================
+// CAR (Auta)
+// ===================================
+model Car {
+  id            Int       @id @default(autoincrement())
+  name          String    @db.VarChar(255) // "MB GL 350 black"
+  spz           String    @db.VarChar(255) // "1AY 1129"
+  carCategoryId Int // FK na kategorii
+  deletedAt     DateTime? // Soft delete (null = aktivní)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relace: auto patří do kategorie
+  carCategory CarCategory @relation(fields: [carCategoryId], references: [id])
+
+  // Indexy pro rychlejší vyhledávání
+  @@index([carCategoryId])
+  @@index([deletedAt]) // Rychlé filtrování aktivních aut
+  @@map("car")
 }
