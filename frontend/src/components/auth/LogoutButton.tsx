@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { logoutAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function LogoutButton() {
 	const router = useRouter();
@@ -15,11 +16,14 @@ export function LogoutButton() {
 
 		try {
 			await logoutAction();
+			toast.success('Byl jste úspěšně odhlášen');
 
 			// Redirect na login
 			router.push('/login');
 			router.refresh(); // Refresh pro vyčištění cache
 		} catch (error) {
+			toast.error('Chyba při odhlašování');
+
 			console.error('Logout error:', error);
 		} finally {
 			setLoading(false);

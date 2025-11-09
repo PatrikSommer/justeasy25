@@ -1,10 +1,10 @@
 // Cesta: frontend/src/components/auth/LoginForm.tsx
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 
 import { loginAction } from '@/actions/auth';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
@@ -22,7 +22,6 @@ import {
 
 export function LoginForm() {
 	const router = useRouter();
-	const [serverError, setServerError] = useState('');
 
 	// React Hook Form s Zod validací
 	const {
@@ -40,21 +39,29 @@ export function LoginForm() {
 	});
 
 	const onSubmit = async (data: LoginFormData) => {
-		setServerError('');
-
+		const loadingToast = toast.loading('Přihlašování...');
 		try {
 			const result = await loginAction(data.email, data.password);
 
 			if (result.success) {
+				toast.success('Přihlášení proběhlo úspěšně!', {
+					id: loadingToast, // Nahradí loading toast
+				});
 				router.push('/dashboard');
 				router.refresh();
 			} else {
-				setServerError(
-					result.error?.message || 'Přihlášení se nezdařilo.'
+				toast.error(
+					result.error?.message || 'Přihlášení se nezdařilo.',
+					{
+						id: loadingToast,
+					}
 				);
 			}
 		} catch (err) {
-			setServerError('Došlo k neočekávané chybě.');
+			toast.error('Došlo k neočekávané chybě.', {
+				id: loadingToast,
+			});
+			console.error('[LOGIN_ERROR]', err);
 		}
 	};
 
@@ -91,13 +98,6 @@ export function LoginForm() {
 						disabled={isSubmitting}
 						required
 					/>
-
-					{/* Server error */}
-					{serverError && (
-						<div className='text-sm text-red-600 bg-red-50 p-3 rounded-md'>
-							{serverError}
-						</div>
-					)}
 
 					{/* Submit button */}
 					<Button
